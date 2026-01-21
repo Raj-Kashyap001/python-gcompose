@@ -32,26 +32,26 @@ def apply_styles(widget, styles_string):
     Unknown classes are ignored by GTK.
     """
     if not styles_string:
-        print("DEBUG: No styles to apply")
+        # print("DEBUG: No styles to apply")
         return
 
-    print(f"DEBUG: Applying styles to widget: '{styles_string}'")
 
     # Parse programmatic properties
     parsed_props, css_classes = StyleParser.parse_all_properties(styles_string)
 
     # Apply programmatic properties
     if parsed_props:
-        print(f"DEBUG: Applying programmatic properties: {parsed_props}")
         apply_size_properties(widget, parsed_props)
         apply_alignment_properties(widget, parsed_props)
     else:
-        print("DEBUG: No programmatic properties found")
+        pass
+        # print("DEBUG: No programmatic properties found")
 
     # Apply remaining CSS classes
     if css_classes:
-        print(f"DEBUG: Applying CSS classes: '{css_classes}'")
+        # print(f"DEBUG: Applying CSS classes: '{css_classes}'")
         for cls in css_classes.split():
             widget.add_css_class(cls)
     else:
-        print("DEBUG: No CSS classes to apply")
+        pass
+        # print("DEBUG: No CSS classes to apply")

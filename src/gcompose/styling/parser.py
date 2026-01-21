@@ -86,19 +86,19 @@ class StyleParser:
         if not styles:
             return {}, styles
 
-        print(f"DEBUG: Parsing styles: '{styles}'")
+        # print(f"DEBUG: Parsing styles: '{styles}'")
 
         # Parse size properties first
         size_props, remaining = StyleParser.parse_size_properties(styles)
-        print(f"DEBUG: Size properties: {size_props}, remaining: '{remaining}'")
+        # print(f"DEBUG: Size properties: {size_props}, remaining: '{remaining}'")
 
         # Then parse alignment properties from remaining
         align_props, final_remaining = StyleParser.parse_alignment_properties(remaining)
-        print(f"DEBUG: Alignment properties: {align_props}, final remaining: '{final_remaining}'")
+        # print(f"DEBUG: Alignment properties: {align_props}, final remaining: '{final_remaining}'")
 
         # Combine all parsed properties
         all_props = {**size_props, **align_props}
-        print(f"DEBUG: All parsed properties: {all_props}")
+        # print(f"DEBUG: All parsed properties: {all_props}")
 
         return all_props, final_remaining
 
@@ -128,7 +128,7 @@ def apply_size_properties(widget, properties: Dict[str, str]):
     width = properties.get('width')
     height = properties.get('height')
 
-    print(f"DEBUG: Applying size properties: width={width}, height={height}")
+    # print(f"DEBUG: Applying size properties: width={width}, height={height}")
 
     # Check if this is a container (Box)
     is_container = hasattr(widget, 'get_orientation')
@@ -136,11 +136,11 @@ def apply_size_properties(widget, properties: Dict[str, str]):
     if width is not None:
         width_px = parse_size_value(width)
         if width == 'full':
-            print("DEBUG: Setting width to full - enabling hexpand")
+            # print("DEBUG: Setting width to full - enabling hexpand")
             widget.set_hexpand(True)
             # Only set FILL alignment for non-containers
             if not is_container:
-                print("DEBUG: Setting halign FILL for non-container")
+                # print("DEBUG: Setting halign FILL for non-container")
                 widget.set_halign(Gtk.Align.FILL)
         elif width_px is not None and width_px >= 0:
             print(f"DEBUG: Setting width to {width_px}px")
@@ -149,40 +149,40 @@ def apply_size_properties(widget, properties: Dict[str, str]):
     if height is not None:
         height_px = parse_size_value(height)
         if height == 'full':
-            print("DEBUG: Setting height to full - enabling vexpand")
+            # print("DEBUG: Setting height to full - enabling vexpand")
             widget.set_vexpand(True)
             # Only set FILL alignment for non-containers
             if not is_container:
-                print("DEBUG: Setting valign FILL for non-container")
+                # print("DEBUG: Setting valign FILL for non-container")
                 widget.set_valign(Gtk.Align.FILL)
         elif height_px is not None and height_px >= 0:
-            print(f"DEBUG: Setting height to {height_px}px")
+            # print(f"DEBUG: Setting height to {height_px}px")
             current_width = widget.get_size_request()[0]
             widget.set_size_request(current_width, height_px)
 
 
 def apply_alignment_properties(widget, properties: Dict[str, str]):
-    """Apply justify-content/align-items properties to a GTK widget."""
+    # """Apply justify-content/align-items properties to a GTK widget."""
     justify = properties.get('justify_content')
     align = properties.get('align_items')
 
-    print(f"DEBUG: Applying alignment properties: justify={justify}, align={align}")
+    # print(f"DEBUG: Applying alignment properties: justify={justify}, align={align}")
 
     # For GTK Box containers, set alignment on the container itself
     if hasattr(widget, 'get_orientation'):
         orientation = widget.get_orientation()
-        print(f"DEBUG: Widget is a Box with orientation: {orientation}")
+        # print(f"DEBUG: Widget is a Box with orientation: {orientation}")
 
         if orientation == Gtk.Orientation.HORIZONTAL:
             # For horizontal boxes (Row)
             if justify == 'start':
-                print("DEBUG: Setting horizontal box halign to START")
+                # print("DEBUG: Setting horizontal box halign to START")
                 widget.set_halign(Gtk.Align.START)
             elif justify == 'center':
-                print("DEBUG: Setting horizontal box halign to CENTER")
+                # print("DEBUG: Setting horizontal box halign to CENTER")
                 widget.set_halign(Gtk.Align.CENTER)
             elif justify == 'end':
-                print("DEBUG: Setting horizontal box halign to END")
+                # print("DEBUG: Setting horizontal box halign to END")
                 widget.set_halign(Gtk.Align.END)
 
             # align-items affects vertical alignment of the box
@@ -198,20 +198,20 @@ def apply_alignment_properties(widget, properties: Dict[str, str]):
         elif orientation == Gtk.Orientation.VERTICAL:
             # For vertical boxes (Column)
             if justify == 'start':
-                print("DEBUG: Setting vertical box valign to START")
+                # print("DEBUG: Setting vertical box valign to START")
                 widget.set_valign(Gtk.Align.START)
             elif justify == 'center':
-                print("DEBUG: Setting vertical box valign to CENTER")
+                # print("DEBUG: Setting vertical box valign to CENTER")
                 widget.set_valign(Gtk.Align.CENTER)
             elif justify == 'end':
-                print("DEBUG: Setting vertical box valign to END")
+                # print("DEBUG: Setting vertical box valign to END")
                 widget.set_valign(Gtk.Align.END)
 
             # align-items affects horizontal alignment of the box
             if align == 'start':
                 widget.set_halign(Gtk.Align.START)
             elif align == 'center':
-                print("DEBUG: Setting vertical box halign to CENTER for items-center")
+                # print("DEBUG: Setting vertical box halign to CENTER for items-center")
                 widget.set_halign(Gtk.Align.CENTER)
             elif align == 'end':
                 widget.set_halign(Gtk.Align.END)
@@ -223,10 +223,10 @@ def apply_alignment_properties(widget, properties: Dict[str, str]):
         print("DEBUG: Widget is not a Box container")
         if hasattr(widget, 'set_halign'):
             if justify == 'start':
-                print("DEBUG: Setting widget halign to START")
+                # print("DEBUG: Setting widget halign to START")
                 widget.set_halign(Gtk.Align.START)
             elif justify == 'center':
-                print("DEBUG: Setting widget halign to CENTER")
+                # print("DEBUG: Setting widget halign to CENTER")
                 widget.set_halign(Gtk.Align.CENTER)
             elif justify == 'end':
                 print("DEBUG: Setting widget halign to END")
@@ -234,14 +234,14 @@ def apply_alignment_properties(widget, properties: Dict[str, str]):
 
         if hasattr(widget, 'set_valign'):
             if align == 'start':
-                print("DEBUG: Setting widget valign to START")
+                # print("DEBUG: Setting widget valign to START")
                 widget.set_valign(Gtk.Align.START)
             elif align == 'center':
-                print("DEBUG: Setting widget valign to CENTER")
+                # print("DEBUG: Setting widget valign to CENTER")
                 widget.set_valign(Gtk.Align.CENTER)
             elif align == 'end':
-                print("DEBUG: Setting widget valign to END")
+                # print("DEBUG: Setting widget valign to END")
                 widget.set_valign(Gtk.Align.END)
             elif align == 'stretch':
-                print("DEBUG: Setting widget valign to FILL")
+                # print("DEBUG: Setting widget valign to FILL")
                 widget.set_valign(Gtk.Align.FILL)

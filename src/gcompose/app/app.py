@@ -1,12 +1,15 @@
 import gi
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Adw, Gio
+from gi.repository import Gtk, Adw, Gio, Gdk, GdkPixbuf
 from pathlib import Path
+import os
+import shutil
 
 class ComposeApp(Adw.Application):
-    def __init__(self, ui_fn, app_id="com.example.gcompose", title="Gcompose Application", 
-                 icon=None, width=800, height=600, frameless=False):
+    def __init__(self, ui_fn, app_id="com.example.gcompose", title="Gcompose Application",
+                 icon=None, width=800, height=600, frameless=False,
+                 bg_color=None, text_color=None, window_icon=None):
         super().__init__(application_id=app_id)
         self.ui_fn = ui_fn
         self.app_title = title
@@ -14,6 +17,9 @@ class ComposeApp(Adw.Application):
         self.default_width = width
         self.default_height = height
         self.frameless = frameless
+        self.bg_color = bg_color
+        self.text_color = text_color
+        self.window_icon = window_icon
     
     def do_activate(self):
         # 1 Load CSS
@@ -33,12 +39,17 @@ class ComposeApp(Adw.Application):
         win = Adw.ApplicationWindow(application=self)
         win.set_default_size(self.default_width, self.default_height)
         win.set_title(self.app_title)
-        
-        if self.app_icon:
-            win.set_icon_name(self.app_icon)
+
+        # TODO: Implement window icon support for GTK 4
+        # GTK 4 requires icons to be installed in the icon theme
+        # For now, icons are not set
         
         # 3 Create content area
         root = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+
+        # Apply root theming
+        if self.bg_color or self.text_color:
+            self._apply_root_theme(root)
         
         # 4 Setup header bar with ToolbarView (THIS IS THE KEY!)
         if not self.frameless:
@@ -69,3 +80,26 @@ class ComposeApp(Adw.Application):
             root.append(lbl)
         
         win.present()
+
+    def _apply_root_theme(self, root):
+        """Apply background and text color theming to the root container."""
+        css_parts = []
+        if self.bg_color:
+            css_parts.append(f"background-color: {self.bg_color};")
+        if self.text_color:
+            css_parts.append(f"color: {self.text_color};")
+
+        if css_parts:
+            css = f".app-root {{ {' '.join(css_parts)} }}"
+            provider = Gtk.CssProvider()
+            provider.load_from_string(css)
+
+            # Add CSS class to root
+            root.add_css_class("app-root")
+
+            # Apply the provider
+            Gtk.StyleContext.add_provider_for_display(
+                Gdk.Display.get_default(),
+                provider,
+                Gtk.STYLE_PROVIDER_PRIORITY_USER
+            )
