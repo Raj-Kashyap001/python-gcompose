@@ -7,10 +7,20 @@ class Composition:
     _hook_index = 0
     _hooks = []
     _rendering = False
+    _app = None
+    _window = None
 
     @classmethod
     def set_root(cls, root):
         cls._root = root
+
+    @classmethod
+    def set_app(cls, app):
+        cls._app = app
+
+    @classmethod
+    def set_window(cls, window):
+        cls._window = window
 
     @classmethod
     def rerender(cls):

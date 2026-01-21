@@ -13,6 +13,8 @@ def mount(root, render_fn, app=None, win=None, frameless=False):
     v1: full redraw on every state change.
     """
     Composition.set_root(root)
+    Composition.set_app(app)
+    Composition.set_window(win)
 
     def render():
         _clear(root)
