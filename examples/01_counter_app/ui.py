@@ -1,4 +1,5 @@
 from gcompose import *
+
 from gi.repository import GObject
 
 """Counter Application"""
