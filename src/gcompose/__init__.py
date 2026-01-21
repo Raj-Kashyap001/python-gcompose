@@ -13,3 +13,4 @@ from .compose.window_state import get_window_state
 
 from .layout.box import Row, Column, HeaderBar
 from .widgets.basic import Text, Button
+from .widgets.sidebar import SidebarLayout, SidebarContent, SidebarMainScreen

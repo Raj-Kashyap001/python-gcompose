@@ -7,9 +7,9 @@ from ui import App
 
 app = ComposeApp(
     App,
-    app_id="com.example.gcompose.v1",
-    title="Counter App",
-    width=400,
-    height=300,
+    app_id="com.gcompose.music_player",
+    title="Music Player",
+    width=800,
+    height=600,
 )
 app.run()
