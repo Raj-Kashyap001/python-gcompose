@@ -12,5 +12,5 @@ from .compose.state import use_state
 from .compose.window_state import get_window_state
 
 from .layout.box import Row, Column, HeaderBar
-from .widgets.basic import Text, Button
+from .widgets.basic import Text, Button, Image, ProgressBar, List
 from .widgets.sidebar import SidebarLayout, SidebarContent, SidebarMainScreen

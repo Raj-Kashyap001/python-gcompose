@@ -17,6 +17,24 @@ def SidebarLayout(styles=None, min_sidebar_width=200, max_sidebar_width=300):
     apply_styles(split_view, styles)
     # Append to current (root)
     Composition.current().append(split_view)
+
+    # Add toggle button to header bar if available
+    window = Composition._window
+    if window:
+        content = window.get_content()
+        if hasattr(content, "get_top_bar"):  # ToolbarView
+            header_bar = content.get_top_bar()
+            if header_bar:
+                # Create toggle button
+                toggle_button = Gtk.ToggleButton()
+                toggle_button.set_icon_name("sidebar-show-symbolic")
+                toggle_button.set_tooltip_text("Toggle Sidebar")
+                toggle_button.set_active(True)
+                toggle_button.connect(
+                    "toggled", lambda btn: split_view.set_show_sidebar(btn.get_active())
+                )
+                header_bar.pack_start(toggle_button)
+
     # Temporarily push to stack so that child context managers can access it as current
     Composition._stack.append(split_view)
     try:

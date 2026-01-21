@@ -4,6 +4,7 @@ from gcompose import *
 
 
 def App():
+    current_track_info, set_current_track_info = use_state(None)
     with SidebarLayout(styles="h-full"):
         sidebar_content()
         main_screen_content()
@@ -22,9 +23,7 @@ def sidebar_content():
 
             # Music list placeholder
             Text("Songs:", styles="text-md font-semibold mb-2")
-            with Column(styles="bg-gray-100 p-2 rounded"):
-                Text("TheFatRat - Xenogenesis (Outro Song).mp3", styles="text-sm")
-                # Add more songs here
+            # Add more songs here
 
 
 def main_screen_content():

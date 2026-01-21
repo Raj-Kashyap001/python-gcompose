@@ -8,18 +8,22 @@ import re
 from typing import Dict, Tuple, Optional
 
 import gi
+
 gi.require_version("Gtk", "4.0")
-from gi.repository import Gtk
+gi.require_version("Adw", "1")
+from gi.repository import Gtk, Adw
 
 
 class StyleParser:
     """Parses style strings to extract properties that need programmatic application."""
 
     # Size properties: w-{value}, h-{value}
-    SIZE_PATTERN = re.compile(r'\b(w|h)-(\d+|full|auto|min|max)\b')
+    SIZE_PATTERN = re.compile(r"\b(w|h)-(\d+|full|auto|min|max)\b")
 
     # Alignment properties: justify-{value}, items-{value}
-    ALIGN_PATTERN = re.compile(r'\b(justify|items)-(start|center|end|stretch|space-between|space-around|space-evenly)\b')
+    ALIGN_PATTERN = re.compile(
+        r"\b(justify|items)-(start|center|end|stretch|space-between|space-around|space-evenly)\b"
+    )
 
     @staticmethod
     def parse_size_properties(styles: str) -> Tuple[Dict[str, str], str]:
@@ -39,14 +43,14 @@ class StyleParser:
             match = StyleParser.SIZE_PATTERN.match(part)
             if match:
                 prop_type, value = match.groups()
-                if prop_type == 'w':
-                    parsed['width'] = value
-                elif prop_type == 'h':
-                    parsed['height'] = value
+                if prop_type == "w":
+                    parsed["width"] = value
+                elif prop_type == "h":
+                    parsed["height"] = value
             else:
                 remaining_parts.append(part)
 
-        return parsed, ' '.join(remaining_parts)
+        return parsed, " ".join(remaining_parts)
 
     @staticmethod
     def parse_alignment_properties(styles: str) -> Tuple[Dict[str, str], str]:
@@ -66,14 +70,14 @@ class StyleParser:
             match = StyleParser.ALIGN_PATTERN.match(part)
             if match:
                 prop_type, value = match.groups()
-                if prop_type == 'justify':
-                    parsed['justify_content'] = value
-                elif prop_type == 'items':
-                    parsed['align_items'] = value
+                if prop_type == "justify":
+                    parsed["justify_content"] = value
+                elif prop_type == "items":
+                    parsed["align_items"] = value
             else:
                 remaining_parts.append(part)
 
-        return parsed, ' '.join(remaining_parts)
+        return parsed, " ".join(remaining_parts)
 
     @staticmethod
     def parse_all_properties(styles: str) -> Tuple[Dict[str, str], str]:
@@ -108,11 +112,11 @@ def parse_size_value(value: str) -> Optional[int]:
     Convert size value to pixels. Returns None for 'auto' or invalid values.
     Special handling for 'full' which means expand to fill.
     """
-    if value == 'auto':
+    if value == "auto":
         return None
-    elif value == 'full':
+    elif value == "full":
         return -1  # Special marker for full expansion
-    elif value in ('min', 'max'):
+    elif value in ("min", "max"):
         # For now, treat as auto
         return None
     else:
@@ -125,17 +129,17 @@ def parse_size_value(value: str) -> Optional[int]:
 
 def apply_size_properties(widget, properties: Dict[str, str]):
     """Apply width/height properties to a GTK widget."""
-    width = properties.get('width')
-    height = properties.get('height')
+    width = properties.get("width")
+    height = properties.get("height")
 
     # print(f"DEBUG: Applying size properties: width={width}, height={height}")
 
     # Check if this is a container (Box)
-    is_container = hasattr(widget, 'get_orientation')
+    is_container = hasattr(widget, "get_orientation")
 
     if width is not None:
         width_px = parse_size_value(width)
-        if width == 'full':
+        if width == "full":
             # print("DEBUG: Setting width to full - enabling hexpand")
             widget.set_hexpand(True)
             # Only set FILL alignment for non-containers
@@ -148,7 +152,7 @@ def apply_size_properties(widget, properties: Dict[str, str]):
 
     if height is not None:
         height_px = parse_size_value(height)
-        if height == 'full':
+        if height == "full":
             # print("DEBUG: Setting height to full - enabling vexpand")
             widget.set_vexpand(True)
             # Only set FILL alignment for non-containers
@@ -163,85 +167,105 @@ def apply_size_properties(widget, properties: Dict[str, str]):
 
 def apply_alignment_properties(widget, properties: Dict[str, str]):
     # """Apply justify-content/align-items properties to a GTK widget."""
-    justify = properties.get('justify_content')
-    align = properties.get('align_items')
+    justify = properties.get("justify_content")
+    align = properties.get("align_items")
 
     # print(f"DEBUG: Applying alignment properties: justify={justify}, align={align}")
 
     # For GTK Box containers, set alignment on the container itself
-    if hasattr(widget, 'get_orientation'):
-        orientation = widget.get_orientation()
-        # print(f"DEBUG: Widget is a Box with orientation: {orientation}")
-
-        if orientation == Gtk.Orientation.HORIZONTAL:
-            # For horizontal boxes (Row)
-            if justify == 'start':
-                # print("DEBUG: Setting horizontal box halign to START")
+    if hasattr(widget, "get_orientation") or isinstance(
+        widget, Adw.NavigationSplitView
+    ):
+        if isinstance(widget, Adw.NavigationSplitView):
+            # Handle Adw.NavigationSplitView alignment
+            if justify == "start":
                 widget.set_halign(Gtk.Align.START)
-            elif justify == 'center':
-                # print("DEBUG: Setting horizontal box halign to CENTER")
+            elif justify == "center":
                 widget.set_halign(Gtk.Align.CENTER)
-            elif justify == 'end':
-                # print("DEBUG: Setting horizontal box halign to END")
+            elif justify == "end":
                 widget.set_halign(Gtk.Align.END)
 
-            # align-items affects vertical alignment of the box
-            if align == 'start':
+            if align == "start":
                 widget.set_valign(Gtk.Align.START)
-            elif align == 'center':
+            elif align == "center":
                 widget.set_valign(Gtk.Align.CENTER)
-            elif align == 'end':
+            elif align == "end":
                 widget.set_valign(Gtk.Align.END)
-            elif align == 'stretch':
+            elif align == "stretch":
                 widget.set_valign(Gtk.Align.FILL)
+        else:
+            orientation = widget.get_orientation()
+            # print(f"DEBUG: Widget is a Box with orientation: {orientation}")
 
-        elif orientation == Gtk.Orientation.VERTICAL:
-            # For vertical boxes (Column)
-            if justify == 'start':
-                # print("DEBUG: Setting vertical box valign to START")
-                widget.set_valign(Gtk.Align.START)
-            elif justify == 'center':
-                # print("DEBUG: Setting vertical box valign to CENTER")
-                widget.set_valign(Gtk.Align.CENTER)
-            elif justify == 'end':
-                # print("DEBUG: Setting vertical box valign to END")
-                widget.set_valign(Gtk.Align.END)
+            if orientation == Gtk.Orientation.HORIZONTAL:
+                # For horizontal boxes (Row)
+                if justify == "start":
+                    # print("DEBUG: Setting horizontal box halign to START")
+                    widget.set_halign(Gtk.Align.START)
+                elif justify == "center":
+                    # print("DEBUG: Setting horizontal box halign to CENTER")
+                    widget.set_halign(Gtk.Align.CENTER)
+                elif justify == "end":
+                    # print("DEBUG: Setting horizontal box halign to END")
+                    widget.set_halign(Gtk.Align.END)
 
-            # align-items affects horizontal alignment of the box
-            if align == 'start':
-                widget.set_halign(Gtk.Align.START)
-            elif align == 'center':
-                # print("DEBUG: Setting vertical box halign to CENTER for items-center")
-                widget.set_halign(Gtk.Align.CENTER)
-            elif align == 'end':
-                widget.set_halign(Gtk.Align.END)
-            elif align == 'stretch':
-                widget.set_halign(Gtk.Align.FILL)
+                # align-items affects vertical alignment of the box
+                if align == "start":
+                    widget.set_valign(Gtk.Align.START)
+                elif align == "center":
+                    widget.set_valign(Gtk.Align.CENTER)
+                elif align == "end":
+                    widget.set_valign(Gtk.Align.END)
+                elif align == "stretch":
+                    widget.set_valign(Gtk.Align.FILL)
+
+            elif orientation == Gtk.Orientation.VERTICAL:
+                # For vertical boxes (Column)
+                if justify == "start":
+                    # print("DEBUG: Setting vertical box valign to START")
+                    widget.set_valign(Gtk.Align.START)
+                elif justify == "center":
+                    # print("DEBUG: Setting vertical box valign to CENTER")
+                    widget.set_valign(Gtk.Align.CENTER)
+                elif justify == "end":
+                    # print("DEBUG: Setting vertical box valign to END")
+                    widget.set_valign(Gtk.Align.END)
+
+                # align-items affects horizontal alignment of the box
+                if align == "start":
+                    widget.set_halign(Gtk.Align.START)
+                elif align == "center":
+                    # print("DEBUG: Setting vertical box halign to CENTER for items-center")
+                    widget.set_halign(Gtk.Align.CENTER)
+                elif align == "end":
+                    widget.set_halign(Gtk.Align.END)
+                elif align == "stretch":
+                    widget.set_halign(Gtk.Align.FILL)
 
     # For non-container widgets, apply basic alignment
     else:
-        print("DEBUG: Widget is not a Box container")
-        if hasattr(widget, 'set_halign'):
-            if justify == 'start':
+        print(f"DEBUG: Widget is not a Box container: {widget}")
+        if hasattr(widget, "set_halign"):
+            if justify == "start":
                 # print("DEBUG: Setting widget halign to START")
                 widget.set_halign(Gtk.Align.START)
-            elif justify == 'center':
+            elif justify == "center":
                 # print("DEBUG: Setting widget halign to CENTER")
                 widget.set_halign(Gtk.Align.CENTER)
-            elif justify == 'end':
+            elif justify == "end":
                 print("DEBUG: Setting widget halign to END")
                 widget.set_halign(Gtk.Align.END)
 
-        if hasattr(widget, 'set_valign'):
-            if align == 'start':
+        if hasattr(widget, "set_valign"):
+            if align == "start":
                 # print("DEBUG: Setting widget valign to START")
                 widget.set_valign(Gtk.Align.START)
-            elif align == 'center':
+            elif align == "center":
                 # print("DEBUG: Setting widget valign to CENTER")
                 widget.set_valign(Gtk.Align.CENTER)
-            elif align == 'end':
+            elif align == "end":
                 # print("DEBUG: Setting widget valign to END")
                 widget.set_valign(Gtk.Align.END)
-            elif align == 'stretch':
+            elif align == "stretch":
                 # print("DEBUG: Setting widget valign to FILL")
                 widget.set_valign(Gtk.Align.FILL)
