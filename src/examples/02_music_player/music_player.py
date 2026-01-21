@@ -1,53 +1,70 @@
 import gi
-import sys
-from tinytag import TinyTag
 
 gi.require_version("Gtk", "4.0")
 gi.require_version("Adw", "1")
-from gi.repository import Gtk, Gio, Adw, GLib
-
-song_path = "Elektronomia - The Sky High [NCS Release].mp3"
-
-
-def print_song_info(path):
-    try:
-        tag = TinyTag.get(path)
-        print("--- Song Information ---")
-        print(f"Title:  {tag.title}")
-        print(f"Artist: {tag.artist}")
-        print(f"Album:  {tag.album}")
-        print(f"Length: {tag.duration:.2f} seconds")
-        print("------------------------")
-    except Exception as e:
-        print(f"Could not read metadata: {e}")
+from gi.repository import Gtk, Gio, GObject
+from tinytag import TinyTag
 
 
-class MusicApp(Adw.Application):
+class MusicPlayer(GObject.Object):
     def __init__(self):
-        super().__init__(application_id="com.example.MusicPlayer")
+        super().__init__()
+        self.media = None
+        self.current_song_path = None
 
-    def do_activate(self):
-        # 1. Print Metadata
-        print_song_info(song_path)
+    def open_file_picker(self, parent_window, callback):
+        """
+        Utility to trigger the system file dialog.
+        callback: function(path, metadata)
+        """
+        dialog = Gtk.FileDialog.new()
+        dialog.set_title("Select Audio File")
 
-        # 2. Setup Playback
-        file = Gio.File.new_for_path(song_path)
+        # Audio filters
+        filter_audio = Gtk.FileFilter()
+        filter_audio.set_name("Audio Files")
+        filter_audio.add_mime_type("audio/*")
+        filters = Gio.ListStore.new(Gtk.FileFilter)
+        filters.append(filter_audio)
+        dialog.set_filters(filters)
+
+        # Async call to open
+        dialog.open(parent_window, None, self._on_file_selected, callback)
+
+    def _on_file_selected(self, dialog, result, callback):
+        try:
+            file = dialog.open_finish(result)
+            if file:
+                path = file.get_path()
+                self.load_and_play(path)
+
+                # Extract metadata
+                metadata = TinyTag.get(path)
+
+                if callback:
+                    callback(path, metadata)
+        except Exception as e:
+            print(f"File selection error: {e}")
+
+    def load_and_play(self, path):
+        """Stops current stream and starts a new file."""
+        if self.media:
+            self.media.set_playing(False)
+
+        self.current_song_path = path
+        file = Gio.File.new_for_path(path)
         self.media = Gtk.MediaFile.new_for_file(file)
-
-        # 3. Play
-        print("Playing audio... (Close the window to stop)")
         self.media.set_playing(True)
 
-        # 4. We need a window to keep the application alive
-        window = Adw.ApplicationWindow(application=self)
-        window.set_title("Audio Player")
-        window.set_default_size(300, 100)
-
-        # Simple UI to show it's working
-        status = Adw.StatusPage(title="Now Playing", description=song_path)
-        window.set_content(status)
-        window.present()
+    def toggle_play(self):
+        """Toggles between play and pause. Returns the new state."""
+        if self.media:
+            new_state = not self.media.get_playing()
+            self.media.set_playing(new_state)
+            return new_state
+        return False
 
 
-app = MusicApp()
-app.run(sys.argv)
+# --- Instance creation ---
+# This is the object you will import in your other files
+audio_player = MusicPlayer()

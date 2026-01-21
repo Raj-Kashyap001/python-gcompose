@@ -99,3 +99,8 @@ button.bg-yellow-500 {
   background-color: var(--yellow-500);
   color: black;
 }
+
+button.size-8 {
+  min-width: 48px;
+  min-height: 48px;
+}

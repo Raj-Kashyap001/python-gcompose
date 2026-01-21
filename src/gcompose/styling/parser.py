@@ -25,6 +25,9 @@ class StyleParser:
         r"\b(justify|items)-(start|center|end|stretch|space-between|space-around|space-evenly)\b"
     )
 
+    # Text alignment properties: text-{left|center|right}
+    TEXT_PATTERN = re.compile(r"\btext-(left|center|right)\b")
+
     @staticmethod
     def parse_size_properties(styles: str) -> Tuple[Dict[str, str], str]:
         """
@@ -55,7 +58,7 @@ class StyleParser:
     @staticmethod
     def parse_alignment_properties(styles: str) -> Tuple[Dict[str, str], str]:
         """
-        Extract justify-content/align-items properties from style string.
+        Extract justify-content/align-items and text-align properties from style string.
 
         Returns:
             Tuple of (parsed_properties dict, remaining_styles string)
@@ -75,7 +78,11 @@ class StyleParser:
                 elif prop_type == "items":
                     parsed["align_items"] = value
             else:
-                remaining_parts.append(part)
+                text_match = StyleParser.TEXT_PATTERN.match(part)
+                if text_match:
+                    parsed["text_align"] = text_match.group(1)
+                else:
+                    remaining_parts.append(part)
 
         return parsed, " ".join(remaining_parts)
 
@@ -166,9 +173,10 @@ def apply_size_properties(widget, properties: Dict[str, str]):
 
 
 def apply_alignment_properties(widget, properties: Dict[str, str]):
-    # """Apply justify-content/align-items properties to a GTK widget."""
+    # """Apply justify-content/align-items and text-align properties to a GTK widget."""
     justify = properties.get("justify_content")
     align = properties.get("align_items")
+    text_align = properties.get("text_align")
 
     # print(f"DEBUG: Applying alignment properties: justify={justify}, align={align}")
 
@@ -269,3 +277,12 @@ def apply_alignment_properties(widget, properties: Dict[str, str]):
             elif align == "stretch":
                 # print("DEBUG: Setting widget valign to FILL")
                 widget.set_valign(Gtk.Align.FILL)
+
+    # Handle text alignment for labels
+    if text_align and hasattr(widget, "set_xalign"):
+        if text_align == "left":
+            widget.set_xalign(0.0)
+        elif text_align == "center":
+            widget.set_xalign(0.5)
+        elif text_align == "right":
+            widget.set_xalign(1.0)

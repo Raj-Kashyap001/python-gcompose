@@ -18,7 +18,7 @@ def Text(value, styles=None):
 
 @Composable
 def Button(
-    label,
+    label="",
     on_click=None,
     styles=None,
     icon=None,
@@ -71,21 +71,31 @@ def Button(
 
 
 @Composable
-def Image(source, styles=None, width=None, height=None):
-    """Image composable that supports file paths or icon names"""
-    if source.startswith("/") or source.startswith("./") or source.startswith("../"):
+def Image(src, styles=None, width=None, height=None):
+    """Image composable that supports file paths or icon names. Width and height are mandatory for proper scaling."""
+    if width is None or height is None:
+        raise ValueError(
+            "Image widget requires both width and height parameters for proper scaling"
+        )
+
+    if src.startswith("/") or src.startswith("./") or src.startswith("../"):
         # File path
-        img = Gtk.Image.new_from_file(source)
+        img = Gtk.Image.new_from_file(src)
     else:
         # Icon name
-        img = Gtk.Image.new_from_icon_name(source)
+        img = Gtk.Image.new_from_icon_name(src)
 
-    if width and height:
-        img.set_size_request(width, height)
-    elif width:
-        img.set_size_request(width, -1)
-    elif height:
-        img.set_size_request(-1, height)
+    # Set expand properties to allow the image to fill available space
+    img.set_hexpand(True)
+    img.set_vexpand(True)
+    img.set_halign(Gtk.Align.FILL)
+    img.set_valign(Gtk.Align.FILL)
+
+    print(
+        f"DEBUG: Setting image pixel_size to {min(width, height)} and size_request to {width}x{height}"
+    )
+    img.set_pixel_size(min(width, height))  # Use pixel_size for scaling
+    img.set_size_request(width, height)
 
     apply_styles(img, styles)
     Composition.current().append(img)
