@@ -1,0 +1,87 @@
+/* ===================================================================
+   TEXT/LABEL COMPONENT STYLES
+   =================================================================== */
+
+/* Text Colors for Labels */
+label.text-gray-50 {
+  color: var(--gray-50);
+}
+label.text-gray-100 {
+  color: var(--gray-100);
+}
+label.text-gray-400 {
+  color: var(--gray-400);
+}
+label.text-gray-500 {
+  color: var(--gray-500);
+}
+label.text-gray-700 {
+  color: var(--gray-700);
+}
+label.text-gray-900 {
+  color: var(--gray-900);
+}
+label.text-red-100 {
+  color: var(--red-100);
+}
+label.text-red-400 {
+  color: var(--red-400);
+}
+label.text-red-500 {
+  color: var(--red-500);
+}
+label.text-red-600 {
+  color: var(--red-600);
+}
+label.text-red-700 {
+  color: var(--red-700);
+}
+label.text-blue-100 {
+  color: var(--blue-100);
+}
+label.text-blue-400 {
+  color: var(--blue-400);
+}
+label.text-blue-500 {
+  color: var(--blue-500);
+}
+label.text-blue-600 {
+  color: var(--blue-600);
+}
+label.text-blue-700 {
+  color: var(--blue-700);
+}
+label.text-green-100 {
+  color: var(--green-100);
+}
+label.text-green-400 {
+  color: var(--green-400);
+}
+label.text-green-500 {
+  color: var(--green-500);
+}
+label.text-green-600 {
+  color: var(--green-600);
+}
+label.text-green-700 {
+  color: var(--green-700);
+}
+label.text-yellow-400 {
+  color: var(--yellow-400);
+}
+label.text-yellow-500 {
+  color: var(--yellow-500);
+}
+label.text-yellow-700 {
+  color: var(--yellow-700);
+}
+label.text-white {
+  color: #ffffff;
+}
+label.text-black {
+  color: #000000;
+}
+label.text-muted {
+  color: var(--gray-500);
+  opacity: 0.8;
+}
