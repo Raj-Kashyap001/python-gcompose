@@ -28,6 +28,9 @@ class StyleParser:
     # Text alignment properties: text-{left|center|right}
     TEXT_PATTERN = re.compile(r"\btext-(left|center|right)\b")
 
+    # Hover state properties: hover:class-name
+    HOVER_PATTERN = re.compile(r"\bhover:(\S+)\b")
+
     @staticmethod
     def parse_size_properties(styles: str) -> Tuple[Dict[str, str], str]:
         """
@@ -87,9 +90,35 @@ class StyleParser:
         return parsed, " ".join(remaining_parts)
 
     @staticmethod
+    def parse_hover_properties(styles: str) -> Tuple[Dict[str, list], str]:
+        """
+        Extract hover state properties from style string.
+        Format: hover:class-name for CSS classes to apply on hover
+
+        Returns:
+            Tuple of (hover_classes dict, remaining_styles string)
+        """
+        if not styles:
+            return {}, ""
+
+        hover_classes = []
+        remaining_parts = []
+
+        for part in styles.split():
+            match = StyleParser.HOVER_PATTERN.match(part)
+            if match:
+                class_name = match.group(1)
+                hover_classes.append(class_name)
+            else:
+                remaining_parts.append(part)
+
+        result = {"hover": hover_classes} if hover_classes else {}
+        return result, " ".join(remaining_parts)
+
+    @staticmethod
     def parse_all_properties(styles: str) -> Tuple[Dict[str, str], str]:
         """
-        Parse all programmatic properties (size and alignment) from style string.
+        Parse all programmatic properties (size, alignment, and hover) from style string.
 
         Returns:
             Tuple of (parsed_properties dict, remaining_styles string)
@@ -107,11 +136,15 @@ class StyleParser:
         align_props, final_remaining = StyleParser.parse_alignment_properties(remaining)
         # print(f"DEBUG: Alignment properties: {align_props}, final remaining: '{final_remaining}'")
 
+        # Then parse hover properties from final remaining
+        hover_props, css_remaining = StyleParser.parse_hover_properties(final_remaining)
+        # print(f"DEBUG: Hover properties: {hover_props}, css remaining: '{css_remaining}'")
+
         # Combine all parsed properties
-        all_props = {**size_props, **align_props}
+        all_props = {**size_props, **align_props, **hover_props}
         # print(f"DEBUG: All parsed properties: {all_props}")
 
-        return all_props, final_remaining
+        return all_props, css_remaining
 
 
 def parse_size_value(value: str) -> Optional[int]:
@@ -252,7 +285,6 @@ def apply_alignment_properties(widget, properties: Dict[str, str]):
 
     # For non-container widgets, apply basic alignment
     else:
-        print(f"DEBUG: Widget is not a Box container: {widget}")
         if hasattr(widget, "set_halign"):
             if justify == "start":
                 # print("DEBUG: Setting widget halign to START")

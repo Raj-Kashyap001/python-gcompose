@@ -1,44 +1,37 @@
 from gcompose import *
 
-from gi.repository import GObject
 
 """Counter Application"""
 
-
-class CounterState(GObject.Object):
-    count = GObject.Property(type=int, default=0)
-
-    def increment(self):
-        self.count += 1
-
-    def decrement(self):
-        if self.count > 0:
-            self.count -= 1
+from gcompose.state import use_state
 
 
 def App():
-    state = CounterState()
+    state = use_state(count=0)
+
+    def increment():
+        state.count += 1
+
+    def decrement():
+        if state.count > 0:
+            state.count -= 1
 
     with Column(styles="w-full h-full justify-center items-center p-4"):
-        label = Text("", styles="text-blue-400 text-2xl")
-        state.bind_property(
-            "count",
-            label,
-            "label",
-            GObject.BindingFlags.DEFAULT | GObject.BindingFlags.SYNC_CREATE,
-            lambda binding, value: f"Count: {value}",
+        Text(
+            bind=Binding(state, "count", format=lambda value: f"Count: {value}"),
+            styles="text-blue-400 text-2xl",
         )
 
         with Row(styles="mt-2"):
             Button(
                 "Increment",
-                lambda: state.increment(),
+                lambda: increment(),
                 styles="bg-green-600",
                 icon="list-add",
             )
             Button(
                 "Decrement",
-                lambda: state.decrement(),
+                lambda: decrement(),
                 styles="bg-red-600",
                 icon="list-remove",
             )

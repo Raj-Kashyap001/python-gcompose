@@ -1,5 +1,6 @@
 from ..compose.runtime import Composition
 
+
 def _clear(container):
     child = container.get_first_child()
     while child:

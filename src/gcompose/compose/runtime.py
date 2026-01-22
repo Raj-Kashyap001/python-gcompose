@@ -1,5 +1,6 @@
 from functools import wraps
 
+
 class Composition:
     _root = None
     _stack = []
@@ -24,6 +25,7 @@ class Composition:
 
     @classmethod
     def rerender(cls):
+        print("DEBUG: Composition.rerender called")
         if cls._render:
             cls._render()
 
@@ -52,7 +54,9 @@ class Composition:
     @classmethod
     def next_hook(cls):
         if not cls._rendering:
-            raise RuntimeError("use_state must be called within a composable function during rendering")
+            raise RuntimeError(
+                "use_state must be called within a composable function during rendering"
+            )
         if cls._hook_index >= len(cls._hooks):
             cls._hooks.append(None)
         hook = cls._hooks[cls._hook_index]
@@ -69,7 +73,9 @@ def Composable(fn):
     Marks a function as composable.
     v1: semantic only (no runtime behavior).
     """
+
     @wraps(fn)
     def wrapper(*args, **kwargs):
         return fn(*args, **kwargs)
+
     return wrapper
